@@ -1,0 +1,24 @@
+name: multiome-py
+# Python side: assembly, features, clustering, ML fidelity, dashboard.
+#
+#   conda env create -f envs/py_env.yaml
+#   conda activate multiome-py
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - scanpy=1.11
+  - anndata
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - pyyaml
+  - h5py
+  - leidenalg
+  - igraph
+  - matplotlib
+  - seaborn
+  - shap
+  - streamlit
+  - snakemake-minimal

@@ -1,0 +1,40 @@
+name: multiome-r
+# R side of the pipeline (ingest + scDesign3).
+#
+#   conda env create -f envs/r_env.yaml
+#   conda activate multiome-r
+#   Rscript -e 'BiocManager::install("EnsDb.Hsapiens.v86", update = FALSE)'
+#   Rscript -e 'devtools::install_github("SONGDONGYUAN1994/scDesign3")'
+#
+# Two packages are deliberately not from conda:
+#   - EnsDb.Hsapiens.v86: bioconda only ships r41 builds, which conflict with
+#     r-base 4.5. It is a data-only package, so BiocManager installs it quickly.
+#   - scDesign3: GitHub only, not on conda or Bioconductor.
+#
+# r-signac (bioconda) is the Signac package; there is no `bioconductor-signac`.
+# Its current builds target R 4.5, hence the r-base pin.
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.5
+  - r-matrix
+  - r-yaml
+  - r-ggplot2
+  - r-patchwork
+  - r-dplyr
+  - r-r.utils
+  - r-devtools
+  - r-future
+  - r-future.apply
+  - r-foreach
+  - r-doparallel
+  - r-seurat
+  - r-signac
+  - bioconductor-singlecellexperiment
+  - bioconductor-genomicranges
+  - bioconductor-genomeinfodb
+  - bioconductor-rtracklayer
+  - bioconductor-rsamtools
+  - bioconductor-biocparallel
+  - bioconductor-scdblfinder

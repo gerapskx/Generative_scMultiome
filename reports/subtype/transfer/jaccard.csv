@@ -1,0 +1,5 @@
+celltype,modality,variable_features,fixed_features,intersection,union,jaccard
+Oligodendrocyte,rna,1000,2000,1000,2000,0.5
+Oligodendrocyte,atac,1000,2000,1000,2000,0.5
+Microglia,rna,1000,2000,1000,2000,0.5
+Microglia,atac,1000,2000,1000,2000,0.5

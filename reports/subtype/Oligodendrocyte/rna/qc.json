@@ -1,0 +1,201 @@
+{
+  "celltype": "Oligodendrocyte",
+  "modality": "rna",
+  "k": 2,
+  "seed": 20261112,
+  "n_features": 1000,
+  "dims": 30,
+  "depth_adjust": true,
+  "n_cells_before_filter": 31444,
+  "n_cells_after_filter": 24585,
+  "n_dropped_doublet": 6729,
+  "n_dropped_marker": 130,
+  "n_dropped_donor": 0,
+  "max_doublet_score": 0.3,
+  "marker_filter": "target>other:PLP1,MBP,MOBP,CNP,OLIG1",
+  "min_cells_per_donor": 10,
+  "dropped_donors": [],
+  "orientation": "marker",
+  "n_train_cells": 15130,
+  "n_test_cells": 9455,
+  "n_train_donors": 16,
+  "n_test_donors": 8,
+  "subtype_sizes_train": {
+    "s1": 6587,
+    "s2": 8543
+  },
+  "subtype_sizes_test": {
+    "s1": 3942,
+    "s2": 5513
+  },
+  "silhouette_train": 0.26042252751546,
+  "assignment": "multinom",
+  "donor_table_train": {
+    "1": [
+      {
+        "donor": "C4322",
+        "s1": 582,
+        "s2": 992,
+        "_row": "C4322"
+      }
+    ],
+    "2": [
+      {
+        "donor": "C4361",
+        "s1": 559,
+        "s2": 898,
+        "_row": "C4361"
+      }
+    ],
+    "3": [
+      {
+        "donor": "C4634",
+        "s1": 12,
+        "s2": 32,
+        "_row": "C4634"
+      }
+    ],
+    "4": [
+      {
+        "donor": "C4660",
+        "s1": 334,
+        "s2": 559,
+        "_row": "C4660"
+      }
+    ],
+    "5": [
+      {
+        "donor": "C4691",
+        "s1": 513,
+        "s2": 710,
+        "_row": "C4691"
+      }
+    ],
+    "6": [
+      {
+        "donor": "C4814",
+        "s1": 529,
+        "s2": 279,
+        "_row": "C4814"
+      }
+    ],
+    "7": [
+      {
+        "donor": "P4560",
+        "s1": 379,
+        "s2": 608,
+        "_row": "P4560"
+      }
+    ],
+    "8": [
+      {
+        "donor": "P4653",
+        "s1": 627,
+        "s2": 1075,
+        "_row": "P4653"
+      }
+    ],
+    "9": [
+      {
+        "donor": "P4772",
+        "s1": 751,
+        "s2": 1003,
+        "_row": "P4772"
+      }
+    ],
+    "10": [
+      {
+        "donor": "P4919",
+        "s1": 509,
+        "s2": 391,
+        "_row": "P4919"
+      }
+    ],
+    "11": [
+      {
+        "donor": "P5318",
+        "s1": 586,
+        "s2": 776,
+        "_row": "P5318"
+      }
+    ],
+    "12": [
+      {
+        "donor": "P5331",
+        "s1": 276,
+        "s2": 251,
+        "_row": "P5331"
+      }
+    ],
+    "13": [
+      {
+        "donor": "P5626",
+        "s1": 270,
+        "s2": 189,
+        "_row": "P5626"
+      }
+    ],
+    "14": [
+      {
+        "donor": "P6259",
+        "s1": 295,
+        "s2": 335,
+        "_row": "P6259"
+      }
+    ],
+    "15": [
+      {
+        "donor": "P6320",
+        "s1": 4,
+        "s2": 12,
+        "_row": "P6320"
+      }
+    ],
+    "16": [
+      {
+        "donor": "P6326",
+        "s1": 361,
+        "s2": 433,
+        "_row": "P6326"
+      }
+    ]
+  },
+  "condition_table_train": {
+    "1": [
+      {
+        "group": "Aged",
+        "s1": 2529,
+        "s2": 3470,
+        "_row": "Aged"
+      }
+    ],
+    "2": [
+      {
+        "group": "PD",
+        "s1": 4058,
+        "s2": 5073,
+        "_row": "PD"
+      }
+    ]
+  },
+  "donor_auc": "NA",
+  "condition_auc": 0.483001780439422,
+  "depth_auc_train": 0.189612320466138,
+  "depth_auc_test": 0.187012101740428,
+  "depth_covariate": "log nCount_RNA",
+  "doublet_auc_train": 0.494856292854119,
+  "doublet_auc_test": 0.494155528149276,
+  "marker_score_train": {
+    "target": [2.92474725968757, 3.55229808170947],
+    "other": [0.0314493614274067, 0.0179444981662548]
+  },
+  "marker_score_test": {
+    "target": [2.94238469458298, 3.54580838035123],
+    "other": [0.0251210569672745, 0.0121100458986213]
+  },
+  "n_train_donors_mixed": 16,
+  "n_test_donors_with_both": 8,
+  "confidence_mean_test": 0.999475935354231,
+  "confidence_q05_test": 1,
+  "confidence_q95_test": 1
+}

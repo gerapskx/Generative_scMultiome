@@ -1,0 +1,151 @@
+project:
+  name: gse193688_multiome
+  data_dir: GSE193688_RAW
+results_dir: results/scale/n16
+processed_dir: data/processed/scale/n16
+samples:
+  sheet: config/subsets/n16.csv
+  consensus_from: used
+  regenerate: false
+qc:
+  min_features_rna: 200
+  max_features_rna: 6000
+  min_counts_rna: 500
+  max_percent_mt: 5
+  min_counts_atac: 1000
+  doublets:
+    enabled: true
+    max_doublet_rate: 0.1
+peaks:
+  min_width: 20
+  max_width: 10000
+  min_cells: 10
+features:
+  rna:
+    method: sct_residuals
+    n: 2000
+    min_fraction: 0.05
+  atac:
+    method: tfidf_binarized_variance
+    n: 2000
+    min_fraction: 0.05
+  fit_on: real_fit
+  fixed_from: results/scale/n24/features
+cluster:
+  resolution: 0.8
+  n_hvg: 3000
+  dims_rna: 30
+  dims_atac: 30
+  integrate: harmony
+  map: results/scale/n16/cluster/celltype_map.csv
+  auto_annotate: true
+  auto_min_score: 0.0
+split:
+  holdout_fraction: 0.3
+  seed: 20261110
+  stratify_by:
+  - celltype
+  - donor
+simulation:
+  family_use: nb
+  copula: gaussian
+  mu_formula: celltype + condition + celltype:condition
+  sigma_formula: '1'
+  corr_formula: '1'
+  n_cores: 2
+  seeds:
+  - 101
+  - 202
+  - 303
+  - 404
+  - 505
+  match_composition: true
+hypothesis:
+  enabled: true
+  contrasts:
+  - celltype
+  - condition
+  sim_modes:
+  - alt
+  - null
+  de_tests:
+  - wilcox
+  target_fdr:
+  - 0.01
+  - 0.05
+  - 0.1
+  - 0.2
+evaluation:
+  models:
+  - logistic_regression
+  - random_forest
+  cv_folds: 5
+  transfer_label: celltype
+  controls:
+  - positive_control
+  - naive_poisson
+  utility: false
+reversal:
+  enabled: true
+  source: PD
+  target: Aged
+  label: C16007 (Aged) vs P02284 (PD) - donor contrast
+  model: celltype + condition + celltype:condition
+  min_cells_per_stratum: 100
+  methods:
+  - model_delta
+  - classifier_contribution
+  controls:
+  - reverse_direction
+  - permuted_condition
+  poc: true
+  poc_min_cells: 30
+  poc_top_n: 100
+  poc_permutations: 10
+  permute: false
+dashboard:
+  port: 8501
+  artifacts: results
+scaling:
+  enabled: true
+  cohort:
+  - Aged
+  - PD
+  steps:
+  - 2
+  - 8
+  - 16
+  - 24
+  seed: 20261111
+  anchor_donors:
+  - C16007
+  - P02284
+  full_dir: results/scale/full
+  root: results/scale
+  fixed_feature_step: 24
+  subset: true
+  ingest_only: false
+  step: 16
+  full_ingest: results/scale/full/ingest
+  assemble: false
+impact:
+  enabled: true
+  fdr: 0.05
+  min_cells_per_stratum: 30
+  cv_folds: 5
+utility:
+  enabled: true
+  label: condition
+  min_train: 100
+  folds: 3
+  seeds:
+  - 101
+  - 202
+  - 303
+  synthetic_sizes:
+  - 500
+  - 1000
+  - 2000
+  - 5000
+  - 10000
+  donor_holdout_fraction: 0.34

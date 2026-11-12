@@ -1,0 +1,197 @@
+{
+  "celltype": "Microglia",
+  "modality": "atac",
+  "k": 2,
+  "seed": 20261112,
+  "n_features": 1000,
+  "dims": 30,
+  "depth_adjust": true,
+  "n_cells_before_filter": 2952,
+  "n_cells_after_filter": 2096,
+  "n_dropped_doublet": 853,
+  "n_dropped_marker": 0,
+  "n_dropped_donor": 3,
+  "max_doublet_score": 0.3,
+  "marker_filter": "none",
+  "min_cells_per_donor": 10,
+  "dropped_donors": [
+    "P6320"
+  ],
+  "orientation": "size",
+  "n_train_cells": 1273,
+  "n_test_cells": 823,
+  "n_train_donors": 16,
+  "n_test_donors": 6,
+  "subtype_sizes_train": {
+    "s1": 1007,
+    "s2": 266
+  },
+  "subtype_sizes_test": {
+    "s1": 725,
+    "s2": 98
+  },
+  "silhouette_train": 0.176296426180787,
+  "assignment": "multinom",
+  "donor_table_train": {
+    "1": [
+      {
+        "donor": "C16007",
+        "s1": 25,
+        "s2": 14,
+        "_row": "C16007"
+      }
+    ],
+    "2": [
+      {
+        "donor": "C4176",
+        "s1": 27,
+        "s2": 8,
+        "_row": "C4176"
+      }
+    ],
+    "3": [
+      {
+        "donor": "C4322",
+        "s1": 32,
+        "s2": 5,
+        "_row": "C4322"
+      }
+    ],
+    "4": [
+      {
+        "donor": "C4361",
+        "s1": 32,
+        "s2": 7,
+        "_row": "C4361"
+      }
+    ],
+    "5": [
+      {
+        "donor": "C4660",
+        "s1": 38,
+        "s2": 8,
+        "_row": "C4660"
+      }
+    ],
+    "6": [
+      {
+        "donor": "C4691",
+        "s1": 17,
+        "s2": 5,
+        "_row": "C4691"
+      }
+    ],
+    "7": [
+      {
+        "donor": "P02284",
+        "s1": 56,
+        "s2": 12,
+        "_row": "P02284"
+      }
+    ],
+    "8": [
+      {
+        "donor": "P4205",
+        "s1": 84,
+        "s2": 22,
+        "_row": "P4205"
+      }
+    ],
+    "9": [
+      {
+        "donor": "P4653",
+        "s1": 66,
+        "s2": 11,
+        "_row": "P4653"
+      }
+    ],
+    "10": [
+      {
+        "donor": "P4884",
+        "s1": 111,
+        "s2": 17,
+        "_row": "P4884"
+      }
+    ],
+    "11": [
+      {
+        "donor": "P4919",
+        "s1": 83,
+        "s2": 32,
+        "_row": "P4919"
+      }
+    ],
+    "12": [
+      {
+        "donor": "P5318",
+        "s1": 76,
+        "s2": 21,
+        "_row": "P5318"
+      }
+    ],
+    "13": [
+      {
+        "donor": "P5626",
+        "s1": 209,
+        "s2": 65,
+        "_row": "P5626"
+      }
+    ],
+    "14": [
+      {
+        "donor": "P5662",
+        "s1": 90,
+        "s2": 22,
+        "_row": "P5662"
+      }
+    ],
+    "15": [
+      {
+        "donor": "P6259",
+        "s1": 18,
+        "s2": 3,
+        "_row": "P6259"
+      }
+    ],
+    "16": [
+      {
+        "donor": "P6326",
+        "s1": 43,
+        "s2": 14,
+        "_row": "P6326"
+      }
+    ]
+  },
+  "condition_table_train": {
+    "1": [
+      {
+        "group": "Aged",
+        "s1": 171,
+        "s2": 47,
+        "_row": "Aged"
+      }
+    ],
+    "2": [
+      {
+        "group": "PD",
+        "s1": 836,
+        "s2": 219,
+        "_row": "PD"
+      }
+    ]
+  },
+  "donor_auc": "NA",
+  "condition_auc": 0.531656995486783,
+  "depth_auc_train": 0.563448716129948,
+  "depth_auc_test": 0.628564391273751,
+  "depth_covariate": "log nCount_ATAC",
+  "doublet_auc_train": 0.52990719101627,
+  "doublet_auc_test": 0.532364532019704,
+  "marker_score_train": {},
+  "marker_score_test": {},
+  "n_train_donors_mixed": 16,
+  "n_test_donors_with_both": 6,
+  "confidence_mean_test": 0.894914854502138,
+  "confidence_q05_test": 0.620821184894155,
+  "confidence_q95_test": 0.992503119496511
+}

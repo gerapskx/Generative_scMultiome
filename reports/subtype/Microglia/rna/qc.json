@@ -1,0 +1,196 @@
+{
+  "celltype": "Microglia",
+  "modality": "rna",
+  "k": 2,
+  "seed": 20261112,
+  "n_features": 1000,
+  "dims": 30,
+  "depth_adjust": true,
+  "n_cells_before_filter": 2952,
+  "n_cells_after_filter": 1269,
+  "n_dropped_doublet": 853,
+  "n_dropped_marker": 821,
+  "n_dropped_donor": 9,
+  "max_doublet_score": 0.3,
+  "marker_filter": "target>other:P2RY12,CSF1R",
+  "min_cells_per_donor": 10,
+  "dropped_donors": [
+    "C4176",
+    "P6320"
+  ],
+  "orientation": "marker",
+  "n_train_cells": 747,
+  "n_test_cells": 522,
+  "n_train_donors": 15,
+  "n_test_donors": 6,
+  "subtype_sizes_train": {
+    "s1": 365,
+    "s2": 382
+  },
+  "subtype_sizes_test": {
+    "s1": 225,
+    "s2": 297
+  },
+  "silhouette_train": 0.159565633343745,
+  "assignment": "multinom",
+  "donor_table_train": {
+    "1": [
+      {
+        "donor": "C16007",
+        "s1": 9,
+        "s2": 19,
+        "_row": "C16007"
+      }
+    ],
+    "2": [
+      {
+        "donor": "C4322",
+        "s1": 13,
+        "s2": 14,
+        "_row": "C4322"
+      }
+    ],
+    "3": [
+      {
+        "donor": "C4361",
+        "s1": 7,
+        "s2": 23,
+        "_row": "C4361"
+      }
+    ],
+    "4": [
+      {
+        "donor": "C4660",
+        "s1": 12,
+        "s2": 21,
+        "_row": "C4660"
+      }
+    ],
+    "5": [
+      {
+        "donor": "C4691",
+        "s1": 7,
+        "s2": 7,
+        "_row": "C4691"
+      }
+    ],
+    "6": [
+      {
+        "donor": "P02284",
+        "s1": 15,
+        "s2": 18,
+        "_row": "P02284"
+      }
+    ],
+    "7": [
+      {
+        "donor": "P4205",
+        "s1": 29,
+        "s2": 54,
+        "_row": "P4205"
+      }
+    ],
+    "8": [
+      {
+        "donor": "P4653",
+        "s1": 34,
+        "s2": 15,
+        "_row": "P4653"
+      }
+    ],
+    "9": [
+      {
+        "donor": "P4884",
+        "s1": 29,
+        "s2": 45,
+        "_row": "P4884"
+      }
+    ],
+    "10": [
+      {
+        "donor": "P4919",
+        "s1": 22,
+        "s2": 28,
+        "_row": "P4919"
+      }
+    ],
+    "11": [
+      {
+        "donor": "P5318",
+        "s1": 29,
+        "s2": 23,
+        "_row": "P5318"
+      }
+    ],
+    "12": [
+      {
+        "donor": "P5626",
+        "s1": 106,
+        "s2": 82,
+        "_row": "P5626"
+      }
+    ],
+    "13": [
+      {
+        "donor": "P5662",
+        "s1": 32,
+        "s2": 15,
+        "_row": "P5662"
+      }
+    ],
+    "14": [
+      {
+        "donor": "P6259",
+        "s1": 10,
+        "s2": 5,
+        "_row": "P6259"
+      }
+    ],
+    "15": [
+      {
+        "donor": "P6326",
+        "s1": 11,
+        "s2": 13,
+        "_row": "P6326"
+      }
+    ]
+  },
+  "condition_table_train": {
+    "1": [
+      {
+        "group": "Aged",
+        "s1": 48,
+        "s2": 84,
+        "_row": "Aged"
+      }
+    ],
+    "2": [
+      {
+        "group": "PD",
+        "s1": 317,
+        "s2": 298,
+        "_row": "PD"
+      }
+    ]
+  },
+  "donor_auc": "NA",
+  "condition_auc": 0.516388888888889,
+  "depth_auc_train": 0.241232159506562,
+  "depth_auc_test": 0.25863823419379,
+  "depth_covariate": "log nCount_RNA",
+  "doublet_auc_train": 0.499820698558416,
+  "doublet_auc_test": 0.505364758698092,
+  "marker_score_train": {
+    "target": [2.34045320105264, 2.84051854503331],
+    "other": [1.40480765912444, 1.49446932683039]
+  },
+  "marker_score_test": {
+    "target": [2.31591419394451, 2.65430841017666],
+    "other": [1.42287102127118, 1.33994810180969]
+  },
+  "n_train_donors_mixed": 15,
+  "n_test_donors_with_both": 6,
+  "confidence_mean_test": 0.998126347080873,
+  "confidence_q05_test": 0.99998037037661,
+  "confidence_q95_test": 1
+}

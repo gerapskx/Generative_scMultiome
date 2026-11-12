@@ -1,0 +1,195 @@
+{
+  "celltype": "Oligodendrocyte",
+  "modality": "atac",
+  "k": 2,
+  "seed": 20261112,
+  "n_features": 1000,
+  "dims": 30,
+  "depth_adjust": true,
+  "n_cells_before_filter": 31444,
+  "n_cells_after_filter": 24715,
+  "n_dropped_doublet": 6729,
+  "n_dropped_marker": 0,
+  "n_dropped_donor": 0,
+  "max_doublet_score": 0.3,
+  "marker_filter": "none",
+  "min_cells_per_donor": 10,
+  "dropped_donors": [],
+  "orientation": "size",
+  "n_train_cells": 15200,
+  "n_test_cells": 9515,
+  "n_train_donors": 16,
+  "n_test_donors": 8,
+  "subtype_sizes_train": {
+    "s1": 7886,
+    "s2": 7314
+  },
+  "subtype_sizes_test": {
+    "s1": 4740,
+    "s2": 4775
+  },
+  "silhouette_train": 0.143570108147874,
+  "assignment": "multinom",
+  "donor_table_train": {
+    "1": [
+      {
+        "donor": "C4322",
+        "s1": 972,
+        "s2": 605,
+        "_row": "C4322"
+      }
+    ],
+    "2": [
+      {
+        "donor": "C4361",
+        "s1": 859,
+        "s2": 602,
+        "_row": "C4361"
+      }
+    ],
+    "3": [
+      {
+        "donor": "C4634",
+        "s1": 18,
+        "s2": 26,
+        "_row": "C4634"
+      }
+    ],
+    "4": [
+      {
+        "donor": "C4660",
+        "s1": 401,
+        "s2": 494,
+        "_row": "C4660"
+      }
+    ],
+    "5": [
+      {
+        "donor": "C4691",
+        "s1": 744,
+        "s2": 483,
+        "_row": "C4691"
+      }
+    ],
+    "6": [
+      {
+        "donor": "C4814",
+        "s1": 273,
+        "s2": 536,
+        "_row": "C4814"
+      }
+    ],
+    "7": [
+      {
+        "donor": "P4560",
+        "s1": 470,
+        "s2": 541,
+        "_row": "P4560"
+      }
+    ],
+    "8": [
+      {
+        "donor": "P4653",
+        "s1": 911,
+        "s2": 793,
+        "_row": "P4653"
+      }
+    ],
+    "9": [
+      {
+        "donor": "P4772",
+        "s1": 1014,
+        "s2": 740,
+        "_row": "P4772"
+      }
+    ],
+    "10": [
+      {
+        "donor": "P4919",
+        "s1": 400,
+        "s2": 516,
+        "_row": "P4919"
+      }
+    ],
+    "11": [
+      {
+        "donor": "P5318",
+        "s1": 746,
+        "s2": 621,
+        "_row": "P5318"
+      }
+    ],
+    "12": [
+      {
+        "donor": "P5331",
+        "s1": 221,
+        "s2": 308,
+        "_row": "P5331"
+      }
+    ],
+    "13": [
+      {
+        "donor": "P5626",
+        "s1": 175,
+        "s2": 288,
+        "_row": "P5626"
+      }
+    ],
+    "14": [
+      {
+        "donor": "P6259",
+        "s1": 278,
+        "s2": 353,
+        "_row": "P6259"
+      }
+    ],
+    "15": [
+      {
+        "donor": "P6320",
+        "s1": 6,
+        "s2": 10,
+        "_row": "P6320"
+      }
+    ],
+    "16": [
+      {
+        "donor": "P6326",
+        "s1": 398,
+        "s2": 398,
+        "_row": "P6326"
+      }
+    ]
+  },
+  "condition_table_train": {
+    "1": [
+      {
+        "group": "Aged",
+        "s1": 3267,
+        "s2": 2746,
+        "_row": "Aged"
+      }
+    ],
+    "2": [
+      {
+        "group": "PD",
+        "s1": 4619,
+        "s2": 4568,
+        "_row": "PD"
+      }
+    ]
+  },
+  "donor_auc": "NA",
+  "condition_auc": 0.50684609391087,
+  "depth_auc_train": 0.690904288559332,
+  "depth_auc_test": 0.653718161132834,
+  "depth_covariate": "log nCount_ATAC",
+  "doublet_auc_train": 0.497219877026684,
+  "doublet_auc_test": 0.499608058850818,
+  "marker_score_train": {},
+  "marker_score_test": {},
+  "n_train_donors_mixed": 16,
+  "n_test_donors_with_both": 8,
+  "confidence_mean_test": 0.93746635030459,
+  "confidence_q05_test": 0.636576443531758,
+  "confidence_q95_test": 0.999998830238793
+}

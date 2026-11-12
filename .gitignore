@@ -1,0 +1,37 @@
+# data - never commit (28 GB)
+GSE193688_RAW/
+GSE193688_RAW.tar
+GSE298008/
+GSE298008_11022026/
+*.RData
+*.rds
+
+# pipeline artifacts
+results/
+data/
+logs/
+.snakemake/
+.snakemake_tmp/
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# misc
+~$*
+.DS_Store
+
+# local reference material (not pipeline inputs)
+Papers/
+Figures/
+*.pptx
+*.docx
+*.pdf
+*.xlsx
+repo/
