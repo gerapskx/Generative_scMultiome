@@ -1,8 +1,7 @@
-# GSE193688 — substantia nigra multiome
+# Testing synthetic data generated from GSE193688
 
-Snakemake pipeline over the GSE193688 snRNA + snATAC cohort: QC and annotation,
-scDesign3 simulation, ML fidelity testing, null/alternative DE benchmarking, and
-a counterfactual PD → Aged reversal analysis, surfaced in a Streamlit dashboard.
+snRNA + snATAC cohort: QC, annotation, scDesign3 simulation, ML fidelity testing, null/alternative DE benchmarking, and
+a counterfactual PD → Aged reversal analysis.
 
 ## Status
 
