@@ -1,7 +1,7 @@
-# Testing synthetic data generated from GSE193688
+# Testing synthetic data generated from GSE193688. This is for my rotatin in Elsasser lab
 
 snRNA + snATAC cohort: QC, annotation, scDesign3 simulation, ML fidelity testing, null/alternative DE benchmarking, and
-a counterfactual PD → Aged reversal analysis.
+a counterfactual PD → Aged reversal analysis. 
 
 ## Status
 
