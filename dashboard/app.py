@@ -11,6 +11,7 @@ pipeline is still running.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -26,6 +27,11 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "results"
 SCALE = RESULTS / "scale"
+
+# The utility figures are shared with `src/plot_utility.py` so the dashboard and
+# the exported PNGs can never drift apart.
+sys.path.insert(0, str(ROOT / "src"))
+import plot_utility as pu  # noqa: E402
 
 # Every page below reads from one cohort directory. The largest step (n24) is the
 # default so the dashboard shows all samples, not just the 2-donor pilot; the pilot
@@ -83,6 +89,17 @@ def missing_box(what: str, stage: str) -> None:
 def fig_show(fig) -> None:
     st.pyplot(fig, width="stretch")
     plt.close(fig)
+
+
+def num(value, digits: int = 3, signed: bool = False) -> str:
+    """Format a number for display, with an em dash for missing values."""
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return "\u2014"
+    if not np.isfinite(value):
+        return "\u2014"
+    return f"{value:+.{digits}f}" if signed else f"{value:.{digits}f}"
 
 
 def obs() -> pd.DataFrame | None:
@@ -912,6 +929,31 @@ def page_scaling() -> None:
     analyses = sorted(comp["analysis"].unique())
     analysis = st.selectbox("Analysis", analyses)
     sub = comp[comp["analysis"] == analysis]
+
+    if analysis == "utility":
+        # The utility rows carry a synthetic-size axis; averaging it away (the
+        # generic N-vs-value panel below) hides the learning curve entirely.
+        util = sub.copy()
+        util["N"] = pd.to_numeric(util["N"], errors="coerce")
+        steps = [f"n{int(n):02d}" for n in sorted(util["N"].dropna().unique())
+                 if (SCALE / f"n{int(n):02d}" / "utility" /
+                     "learning_curve.csv").exists()]
+        if not steps:
+            st.info("No utility learning curves for these steps yet.")
+            return
+        st.subheader("Utility across cohorts")
+        fig_show(pu.build_by_cohort(steps, util))
+        fig_auc, fig_delta = pu.build_heatmaps(steps, util)
+        fig_show(fig_auc)
+        fig_show(fig_delta)
+        st.caption(
+            "Each point is the AUC at the largest synthetic size (10k), with "
+            "the size-matched real control beside it; held-out donor counts are "
+            "under the ticks. n16 is below chance for both modalities and is "
+            "shown as such. See the Synthetic utility page for the full curve."
+        )
+        return
+
     metrics = sorted(sub["metric"].unique())
     metric = st.selectbox("Metric", metrics)
     d = sub[sub["metric"] == metric].copy()
@@ -1020,13 +1062,16 @@ def page_impact() -> None:
 
 def page_utility() -> None:
     st.title("Synthetic-to-real utility")
-    st.caption(f"Cohort: {COHORT_LABEL}.")
-    steps = sorted([p.name for p in SCALE.glob("n*") if p.is_dir()])
-    if not steps:
-        missing_box("Scaling steps", "plan_scaling")
-        return
+    st.caption(
+        f"Cohort: **{COHORT_LABEL}**. A classifier is trained on synthetic cells "
+        "and tested on donors that were held out before simulation, so a high "
+        "score means the synthetic data carries donor-level condition signal, "
+        "not that it memorised the training donors."
+    )
 
     curve = read_csv(str(d("utility", "learning_curve.csv")))
+    raw = read_csv(str(d("utility", "utility.csv")))
+    folds = read_csv(str(d("utility", "sim", "folds.csv")))
     summary = read_json(str(d("utility", "summary.json")))
     if curve is None:
         missing_box(f"Utility results for {COHORT_LABEL}", "utility")
@@ -1035,24 +1080,81 @@ def page_utility() -> None:
     for col in ("auc_mean", "auc_sd", "bal_mean", "bal_sd"):
         if col in curve.columns:
             curve[col] = pd.to_numeric(curve[col], errors="coerce")
+    if "synthetic_size" in curve.columns:
+        curve["synthetic_size"] = pd.to_numeric(curve["synthetic_size"],
+                                                errors="coerce")
+
+    st.subheader("At the largest synthetic size")
+    for col, modality in zip(st.columns(2), ("rna", "atac")):
+        ceiling = pu.single(curve, modality, "real_trained", "auc")
+        floor = pu.single(curve, modality, "naive_poisson", "auc")
+        x, mean, _ = pu.method_curve(curve, modality, "synthetic", "auc")
+        _, matched, _ = pu.method_curve(curve, modality, "real_matched", "auc")
+        syn = float(mean[-1]) if len(mean) else float("nan")
+        mat = float(matched[-1]) if len(matched) else float("nan")
+        top = f"{pu.SIZE_LABELS.get(int(x[-1]), int(x[-1]))}" if len(x) else "—"
+        col.markdown(f"**{modality.upper()}** · synthetic at {top}")
+        col.metric("synthetic", num(syn),
+                   f"{num(syn - pu.CHANCE, signed=True)} vs chance")
+        col.metric("matched real (same n)", num(mat),
+                   f"{num(syn - mat, signed=True)} for synthetic")
+        col.metric("real donors (ceiling)", num(ceiling),
+                   f"{num(syn - ceiling, signed=True)} gap")
+        col.caption(f"marginal-only floor: {num(floor)} AUC")
 
     st.subheader("Learning curve")
-    fig, axes = plt.subplots(1, 2, figsize=(12, 3.8), sharex=True)
-    sns.lineplot(data=curve, x="synthetic_size", y="auc_mean", hue="method",
-                 style="modality", marker="o", ax=axes[0])
-    axes[0].axhline(0.5, color="black", ls="--", lw=1)
-    axes[0].set_ylim(0, 1.02)
-    axes[0].set_xlabel("synthetic training cells")
-    axes[0].set_ylabel("AUC on held-out donors")
-    sns.lineplot(data=curve, x="synthetic_size", y="bal_mean", hue="method",
-                 style="modality", marker="o", ax=axes[1])
-    axes[1].axhline(0.5, color="black", ls="--", lw=1)
-    axes[1].set_ylim(0, 1.02)
-    axes[1].set_xlabel("synthetic training cells")
-    axes[1].set_ylabel("balanced accuracy")
-    fig.tight_layout()
+    fig = pu.build_learning_curve(
+        DATA.name if DATA.name.startswith("n") else "cohort",
+        curve, raw, folds,
+        title=f"Synthetic-to-real utility \u2014 {COHORT_LABEL}")
     fig_show(fig)
+    st.caption(
+        "x is the number of synthetic training cells, on a log2 axis. "
+        "`synthetic` and `matched real` are both trained on exactly that many "
+        "cells, so their gap is the value of the synthetic data at equal "
+        "sample size. The red dashed and orange dotted lines are reference "
+        "levels (`real donors` uses every real training cell, `marginal only` "
+        "is the naive baseline); neither is a point on the size axis. Grey is "
+        "the same synthetic cells with shuffled labels."
+    )
 
+    util = pu.comparison_frame() if (SCALE / "comparison.csv").exists() else None
+    if util is not None and not util.empty:
+        util["N"] = pd.to_numeric(util["N"], errors="coerce")
+        steps = [f"n{int(n):02d}" for n in
+                 sorted(util["N"].dropna().unique())
+                 if (SCALE / f"n{int(n):02d}" / "utility" /
+                     "learning_curve.csv").exists()]
+        if len(steps) > 1:
+            st.subheader("Across cohorts")
+            st.caption(
+                "Held-out donor counts are shown under each tick. n16 is below "
+                "chance for both modalities: with 5 held-out donors the "
+                "condition contrast does not transfer, so the dip is real and "
+                "is left visible rather than smoothed away."
+            )
+            fig_show(pu.build_by_cohort(steps, util))
+            fig_auc, fig_delta = pu.build_heatmaps(steps, util)
+            fig_show(fig_auc)
+            st.caption(
+                "Colour is centred on chance (0.5): red is above chance, blue "
+                "below. The first column is the real-donor ceiling for that "
+                "cohort."
+            )
+            fig_show(fig_delta)
+            st.caption(
+                "\u0394 AUC = synthetic \u2212 size-matched real, at identical "
+                "training size. Red means the synthetic cells beat the same "
+                "number of real cells; blue means they add nothing over real "
+                "cells of the same count."
+            )
+    else:
+        st.info(
+            "`results/scale/comparison.csv` has no utility rows yet; run "
+            "`scaling_compare` for the cross-cohort panels."
+        )
+
+    st.subheader("All rows")
     st.dataframe(curve.round(3), width="stretch", hide_index=True)
 
     if summary and summary.get("status") == "not_estimable":
@@ -1062,12 +1164,13 @@ def page_utility() -> None:
         )
 
     st.caption(
-        "`real_trained` is the upper bound: train on real training donors and "
-        "test on held-out donors. `synthetic` is the PoC: train on synthetic "
-        "cells generated from training donors. `naive_poisson` is a marginal-only "
-        "lower bound; `permuted_labels` and `majority` are chance controls. A "
-        "utility that rises with N is gaining donor-level information; one that "
-        "rises only with synthetic size is resampling the same donors."
+        "Synthetic cells are drawn from the scDesign3 fit on training donors "
+        "only, then subsampled without replacement. `real_trained` is the upper "
+        "bound, `real_matched` is the same-n real control, `naive_poisson` is a "
+        "marginal-only lower bound, and `permuted_labels` / `majority` are "
+        "chance controls. A utility that rises with N is gaining donor-level "
+        "information; one that rises only with synthetic size is resampling the "
+        "same donors."
     )
 
 
@@ -1238,7 +1341,10 @@ def page_methods() -> None:
   condition versus donor, and the counterfactual magnitude.
 - **Synthetic utility** trains a condition classifier on synthetic cells from
   training donors and tests it on held-out real donors. Real-trained,
-  naive-Poisson, permuted-label and majority baselines bracket the result.
+  size-matched real, naive-Poisson, permuted-label and majority baselines
+  bracket the result; the size-matched control is trained on the same number of
+  real cells as each synthetic size, so the synthetic-minus-real gap is not
+  confounded with less training data.
 - **Scaling** repeats every stage on nested donor sets (n02, n08, n16, n24) with
   a fixed n24 feature set and 5 simulation seeds.
 - **Subtype transfer** subclusters Oligodendrocyte and Microglia into k=2 on

@@ -7,6 +7,7 @@ cells generated from training donors and tested on held-out real donors.
 
 Baselines
     real_trained     real training donors -> held-out donors (upper bound)
+    real_matched     k real training cells -> held-out donors (size-matched)
     synthetic        synthetic training cells -> held-out donors (the PoC)
     naive_poisson    marginal-only synthetic -> held-out donors (lower bound)
     permuted_labels  synthetic with shuffled condition labels -> chance
@@ -220,6 +221,27 @@ def main() -> int:
                         "fold": fold, "modality": modality, "label": args.label,
                         "synthetic_size": size, "seed": seed,
                         "method": "permuted_labels",
+                        "n_train": k, "n_test": len(y_real_test),
+                        **res,
+                    })
+
+                    # ---- matched real control --------------------------
+                    # Same k training cells, drawn from the real training donors,
+                    # so `synthetic - real_matched` isolates the value of the
+                    # synthetic data from the cost of training on fewer cells.
+                    # A dedicated RNG keeps the synthetic draws above unchanged.
+                    real_rng = np.random.default_rng(args.seed + seed + size)
+                    real_take = np.sort(real_rng.choice(len(y_real_train), k,
+                                                        replace=False))
+                    ys_real = y_real_train[real_take]
+                    if len(np.unique(ys_real)) < 2:
+                        continue
+                    res = fit_predict(x_train[real_take], ys_real, x_test,
+                                      y_real_test)
+                    rows.append({
+                        "fold": fold, "modality": modality, "label": args.label,
+                        "synthetic_size": size, "seed": seed,
+                        "method": "real_matched",
                         "n_train": k, "n_test": len(y_real_test),
                         **res,
                     })

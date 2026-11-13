@@ -158,7 +158,7 @@ the *interpretation* changes with N, not just whether a p-value crosses a thresh
 | fidelity | real-vs-synthetic AUC (LR/RF), identity/positive/naive controls |
 | hypothesis | null FDP, alt power, FC correlation at FDR 0.01–0.2 |
 | impact | DE burden, mean |log2FC|, donor-held-out AUC, eta² condition vs donor, PD fraction |
-| utility | synthetic-trained AUC / balanced accuracy vs real-trained, naive-Poisson, permuted-label and majority baselines |
+| utility | synthetic-trained AUC / balanced accuracy vs real-trained, size-matched real, naive-Poisson, permuted-label and majority baselines |
 | reversal | counterfactual |log2FC|, reverse-direction correlation, model↔classifier agreement |
 
 ### Cell-type impact
@@ -177,6 +177,7 @@ donor-disjoint cohorts. `src/synthetic_utility.py` then trains a condition class
 on synthetic cells and tests it on held-out real donors. The baselines are:
 
 - `real_trained` — train on real training donors (upper bound)
+- `real_matched` — train on the same number of real training cells as the synthetic curve
 - `naive_poisson` — marginal-only synthetic (lower bound)
 - `permuted_labels`, `majority` — chance controls
 
@@ -184,6 +185,26 @@ The learning curve varies the number of synthetic training cells (500–10,000) 
 step. A utility that rises with N is gaining donor-level information; one that rises
 only with synthetic size is resampling the same donors. The test is donor-disjoint and
 therefore `not_estimable` at n02.
+
+`real_matched` is what makes the curve interpretable: `synthetic − real_matched` is the
+value of the synthetic data at equal sample size, while `real_matched − real_trained` is
+the cost of training on fewer cells. Without it the "gap to ceiling" mixes both effects.
+It draws its own cells with a dedicated RNG, so the synthetic subsamples are unchanged.
+
+Note on the x axis: 10,000 is `utility.synthetic_sizes`' configured maximum
+(`R/05_utility_sim.R` simulates `max_size` cells once per fold and
+`src/synthetic_utility.py` subsamples them). It is not a property of the cohort, so
+`real_trained` (all real training cells) and `naive_poisson` (whose `synthetic_size`
+is `n_train`) are drawn as horizontal reference lines, never as points on the size
+axis.
+
+Figures: `python src/plot_utility.py` writes five 300 dpi PNGs to the Windows
+Desktop `Utility` folder (`C:\Users\gerar\OneDrive\Desktop\Utility`) —
+`utility_learning_curve_<step>.png` (2×2 RNA/ATAC ×
+AUC/balanced accuracy), `utility_by_cohort.png` (AUC vs donors plus gains over the
+matched and marginal controls), `utility_heatmap.png`,
+`utility_delta_heatmap.png` and `utility_learning_curve_all_cohorts.png`. The
+dashboard imports the same builders, so the page and the PNGs cannot drift apart.
 
 ### Results (Aged vs PD series)
 
@@ -248,22 +269,27 @@ donor-held-out AUC by construction (condition == donor).
 
 **Synthetic-to-real utility** (train synthetic → test held-out donors; AUC):
 
-| N | modality | real-trained | syn 500 | syn 1k | syn 2k | syn 5k | syn 10k |
-|---|---|---|---|---|---|---|---|
-| 8 | RNA | 0.802 | 0.674 | 0.676 | 0.686 | 0.720 | 0.725 |
-| 8 | ATAC | 0.525 | 0.454 | 0.502 | 0.497 | 0.522 | 0.521 |
-| 16 | RNA | 0.446 | 0.387 | 0.359 | 0.367 | 0.393 | 0.391 |
-| 16 | ATAC | 0.392 | 0.401 | 0.387 | 0.415 | 0.417 | 0.420 |
-| 24 | RNA | 0.663 | 0.553 | 0.549 | 0.548 | 0.562 | 0.567 |
-| 24 | ATAC | 0.601 | 0.562 | 0.571 | 0.562 | 0.566 | 0.582 |
+| N | modality | real-trained | matched real @10k | syn 500 | syn 1k | syn 2k | syn 5k | syn 10k | syn − matched @10k |
+|---|---|---|---|---|---|---|---|---|---|
+| 8 | RNA | 0.802 | 0.798 | 0.674 | 0.676 | 0.686 | 0.720 | 0.725 | −0.073 |
+| 8 | ATAC | 0.525 | 0.522 | 0.454 | 0.502 | 0.497 | 0.522 | 0.521 | −0.001 |
+| 16 | RNA | 0.446 | 0.414 | 0.387 | 0.359 | 0.367 | 0.393 | 0.391 | −0.023 |
+| 16 | ATAC | 0.392 | 0.410 | 0.401 | 0.387 | 0.415 | 0.417 | 0.420 | +0.010 |
+| 24 | RNA | 0.663 | 0.653 | 0.553 | 0.549 | 0.548 | 0.562 | 0.567 | −0.086 |
+| 24 | ATAC | 0.601 | 0.589 | 0.562 | 0.571 | 0.562 | 0.566 | 0.582 | −0.007 |
 
-Synthetic utility rises monotonically with synthetic size at every step, but the
-gain is modest (RNA +0.05 at n08, +0.004 at n16, +0.014 at n24 from 500 to
-10k). The `real_trained` ceiling is unstable across steps because the donor-held-out
-fold changes composition: at n16 the five held-out donors are 3 Aged / 2 PD and the
-real-trained classifier is *below chance* (0.446 RNA, 0.392 ATAC). That is a
+Synthetic utility rises with synthetic size at every step, but the gain is modest
+(RNA +0.05 at n08, +0.004 at n16, +0.014 at n24 from 500 to 10k). The
+size-matched control changes how that is read: at equal n, real cells are better
+than synthetic ones in RNA (−0.073 at n08, −0.086 at n24), and ATAC is a wash
+(±0.01). So most of the "gap to the ceiling" at 10k is the cost of training on
+10k cells instead of all training cells, not a synthetic-specific loss. The
+`real_trained` ceiling is unstable across steps because the donor-held-out
+fold changes composition: at n16 the five held-out donors are 3 Aged / 2 PD and
+the real-trained classifier is *below chance* (0.446 RNA, 0.392 ATAC). That is a
 donor-confound artifact of a single fold, not evidence that condition is
-unlearnable. n02 is `not_estimable` (one donor per condition).
+unlearnable — the matched real control sits at the same level (0.414 / 0.410).
+n02 is `not_estimable` (one donor per condition).
 
 **Reversal PoC** (known-effect recovery, null specificity, donor confound):
 
