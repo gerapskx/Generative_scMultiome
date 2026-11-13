@@ -413,6 +413,22 @@ The **Report** page renders a written explanation of every section — what it m
 how to read it, what the selected cohort shows, and the caveat — generated from the
 same artifacts, and can be downloaded as Markdown.
 
+### Figures on disk
+
+The dashboard only draws in memory. To get a folder tree of PNGs, one subfolder per
+pipeline section and cohort:
+
+```bash
+python src/export_figures.py --out ~/Desktop/GSE193688_figures
+```
+
+It imports the dashboard pages, swaps `st.pyplot` for `savefig`, and drives the
+dropdowns so each option is exported (`UMAP` × 4 colourings, every scaling
+analysis × metric, every subtype cell type × modality). Output is 300 dpi PNG with a
+`README.md` and `index.csv` listing each file's heading and selection. A
+`_MISSING.txt` marks a stage that has no artifacts for that cohort; `_ERROR.txt`
+records a page that failed to render.
+
 
 
 ## Setup
