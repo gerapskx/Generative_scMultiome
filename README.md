@@ -445,6 +445,21 @@ Labels use `adjustText` repulsion with thin leader lines; ATAC peaks are shorten
 `chr16:46.39Mb`. Panels whose log2FC range exceeds ±8 (a few very low-count genes)
 switch to a symlog x-axis so the bulk of the distribution stays readable.
 
+### Gene-expression UMAPs
+
+Overlay one gene at a time on the same embedding, straight from the raw counts:
+
+```bash
+python src/plot_gene_umap.py --step n24 --genes XIST UTY TMEM156 TSIX
+```
+
+Counts are normalised to log1p(CP10k) using each cell's `nCount_RNA`; non-expressing
+cells stay as a light grey background. Writes one PNG per gene, a combined grid, and
+`gene_expression_summary_<step>.csv` with the percentage of expressing cells and the
+mean expression per condition. The four-gene extraction is cached under
+`results/scale/<step>/features/umap_gene_counts.tsv` (first run streams the full
+Matrix Market file, ~35 s; later runs reuse the cache).
+
 
 
 ## Setup
