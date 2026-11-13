@@ -428,6 +428,23 @@ analysis × metric, every subtype cell type × modality). Output is 300 dpi PNG 
 `_MISSING.txt` marks a stage that has no artifacts for that cohort; `_ERROR.txt`
 records a page that failed to render.
 
+### Labelled reversal plots
+
+The reversal scatter panels label the features at the top of either ranking — the
+counterfactual model (`|log2FC|`, red) and the classifier (`|contribution|`, green):
+
+```bash
+python src/plot_reversal.py --step n24            # 10 panels + grid, top 5 each
+python src/plot_reversal.py --step n24 --top 8    # more labels per panel
+```
+
+Output goes to `~/Desktop/Reversal` by default (`--outdir` to change it): one PNG per
+modality × cell type, a `reversal_grid_<step>.png` overview, and
+`labelled_features.csv` listing every label with its coordinates and ranking method.
+Labels use `adjustText` repulsion with thin leader lines; ATAC peaks are shortened to
+`chr16:46.39Mb`. Panels whose log2FC range exceeds ±8 (a few very low-count genes)
+switch to a symlog x-axis so the bulk of the distribution stays readable.
+
 
 
 ## Setup
