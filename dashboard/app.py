@@ -31,6 +31,7 @@ SCALE = RESULTS / "scale"
 # The utility figures are shared with `src/plot_utility.py` so the dashboard and
 # the exported PNGs can never drift apart.
 sys.path.insert(0, str(ROOT / "src"))
+import plot_impact as pi  # noqa: E402
 import plot_utility as pu  # noqa: E402
 
 # Every page below reads from one cohort directory. The largest step (n24) is the
@@ -999,64 +1000,131 @@ def page_scaling() -> None:
 
 def page_impact() -> None:
     st.title("Cell-type impact of disease")
-    st.caption(f"Cohort: {COHORT_LABEL}.")
-    steps = sorted([p.name for p in SCALE.glob("n*") if p.is_dir()])
-    if not steps:
-        missing_box("Scaling steps", "plan_scaling")
-        return
+    st.caption(
+        f"Cohort: **{COHORT_LABEL}**. Two numbers are reported for every cell "
+        "type: `de_burden` is a cell-level PD-vs-Aged test whose power grows "
+        "with the number of cells, and `donor_auc` is a classifier trained on "
+        "some donors and tested on held-out donors. Only the latter is a "
+        "condition test; 0.5 is chance."
+    )
 
     impact = read_csv(str(d("impact", "celltype_impact.csv")))
     if impact is None:
         missing_box(f"Cell-type impact for {COHORT_LABEL}", "impact")
         return
 
-    for col in ("de_burden", "mean_abs_lfc_sig", "donor_auc",
-                 "condition_variance_share", "pd_fraction",
-                 "reversal_mean_abs_lfc"):
-        if col in impact.columns:
-            impact[col] = pd.to_numeric(impact[col], errors="coerce")
+    impact = pi.numeric(
+        impact,
+        ("n_cells", "n_pd", "n_aged", "n_donors", "n_de_sig", "de_burden",
+         "mean_abs_lfc_sig", "max_abs_lfc_sig", "donor_auc",
+         "donor_balanced_accuracy", "donor_folds", "eta2_condition",
+         "eta2_donor", "condition_variance_share", "pd_fraction",
+         "reversal_mean_abs_lfc"),
+    )
+    has_auc = ("donor_auc" in impact.columns
+               and bool(np.isfinite(impact["donor_auc"]).any()))
+    one_donor = (
+        "condition_equals_donor" in impact.columns
+        and impact["condition_equals_donor"].astype(str).str.lower()
+        .isin(("true", "1")).any()
+    )
+    if one_donor or not has_auc:
+        st.warning(
+            "One donor per condition in this cohort: `donor_auc` is not "
+            "estimable and every cell-level contrast is also a donor "
+            "contrast. The condition test only becomes meaningful from n08 "
+            "onward."
+        )
 
     st.subheader("Ranked impact")
-    fig, axes = plt.subplots(1, 2, figsize=(12, 3.8))
-    sns.barplot(data=impact, x="celltype", y="de_burden", hue="modality", ax=axes[0])
-    axes[0].set_ylabel("significant / testable")
-    axes[0].set_xlabel("")
-    axes[0].tick_params(axis="x", rotation=25)
-    sns.barplot(data=impact, x="celltype", y="donor_auc", hue="modality", ax=axes[1])
-    axes[1].axhline(0.5, color="black", ls="--", lw=1)
-    axes[1].set_ylim(0, 1.02)
-    axes[1].set_ylabel("donor-held-out AUC")
-    axes[1].set_xlabel("")
-    axes[1].tick_params(axis="x", rotation=25)
-    fig.tight_layout()
-    fig_show(fig)
+    fig_show(pi.build_dumbbell(
+        impact, title=f"Cell-type impact \u2014 {COHORT_LABEL}"))
+    st.caption(
+        "Each row is one cell type, sorted by donor-held-out AUC (best at the "
+        "top). The hollow marker is DE burden and the filled marker is the "
+        "AUC; the connector is their disagreement. A long connector marks a "
+        "cell type where a broad transcriptional shift does not generalise "
+        "across donors (or the reverse). The label gives the number of cells."
+    )
 
-    st.dataframe(impact.round(3), width="stretch", hide_index=True)
+    if has_auc:
+        st.subheader("Burden vs separability")
+        fig = pi.build_scatter(
+            impact, title=f"Burden vs separability \u2014 {COHORT_LABEL}")
+        if fig is not None:
+            fig_show(fig)
+        st.caption(
+            "Marker area scales with the number of cells. The green corner is "
+            "a broad effect that generalises across donors; the red corner is "
+            "a broad effect that is largely donor-driven. Points below the "
+            "dashed line are below chance, which at n08 is fold noise."
+        )
 
-    st.subheader("Donor-held-out separability vs N")
-    frames = []
-    for s in steps:
-        p = SCALE / s / "impact" / "celltype_impact.csv"
-        if not p.exists():
-            continue
-        t = pd.read_csv(p)
-        t["N"] = int(s.replace("n", ""))
-        frames.append(t)
-    if frames:
-        all_imp = pd.concat(frames, ignore_index=True)
-        all_imp["donor_auc"] = pd.to_numeric(all_imp["donor_auc"], errors="coerce")
-        fig, ax = plt.subplots(figsize=(8, 3.8))
-        sns.lineplot(data=all_imp, x="N", y="donor_auc", hue="celltype",
-                     style="modality", marker="o", ax=ax)
-        ax.axhline(0.5, color="black", ls="--", lw=1)
-        ax.set_ylim(0, 1.02)
-        ax.set_ylabel("donor-held-out AUC")
-        fig_show(fig)
+    st.subheader("Across cohorts")
+    all_imp = (pi.comparison_impact()
+               if (SCALE / "comparison.csv").exists() else pd.DataFrame())
+    if all_imp is not None and not all_imp.empty:
+        fig = pi.build_heatmaps(all_imp)
+        if fig is not None:
+            fig_show(fig)
+        st.caption(
+            "Rows are cell types and columns are cohorts. The top row is DE "
+            "burden (`Blues`, no chance level); the bottom row is donor-held-"
+            "out AUC (`RdBu_r` centred on 0.5: red above chance, blue below). "
+            "Grey cells are cell types absent from that cohort. n02 is "
+            "excluded because the AUC is not estimable there."
+        )
+    else:
+        st.info(
+            "`results/scale/comparison.csv` has no impact rows yet; run "
+            "`scaling_compare` for the cross-cohort panels."
+        )
 
-    st.error(
-        "At n02 there is one donor per condition, so `donor_auc` is undefined "
-        "and every cell-level contrast is also a donor contrast. The metric only "
-        "becomes a condition test from n08 onward."
+    de = read_csv(str(d("impact", "de_features.csv")))
+    if de is not None:
+        de = pi.numeric(de, ("log2fc", "p", "q"))
+        de["significant"] = de["significant"].astype(str).str.lower().isin(
+            ("true", "1"))
+        de["testable"] = de["testable"].astype(str).str.lower().isin(
+            ("true", "1"))
+        celltypes = sorted(de["celltype"].dropna().unique())
+        modalities = [m for m in ("rna", "atac")
+                      if (de["modality"] == m).any()]
+        if celltypes and modalities:
+            st.subheader("Feature detail")
+            c1, c2 = st.columns(2)
+            ct = c1.selectbox("Cell type", celltypes)
+            mod = c2.selectbox("Modality", modalities)
+            fig_show(pi.build_de_features(
+                de, [ct], mod, top_n=15,
+                title=f"Top DE features \u2014 {ct} {mod.upper()} "
+                      f"({COHORT_LABEL})"))
+            st.caption(
+                "Top 15 significant features by |log2 FC| (PD minus Aged). Red "
+                "is higher in PD, blue is lower in PD. Marker area encodes the "
+                "q-value: larger is more significant. An empty panel means the "
+                "cell type has no significant features, which is the honest "
+                "result, not a missing artifact. XIST/TSIX sit at the top of "
+                "almost every cell type because they track donor sex, which is "
+                "imbalanced between the PD and Aged groups; read the ranking as "
+                "condition plus donor covariates, not condition alone."
+            )
+
+    st.subheader("All rows")
+    keep = [c for c in (
+        "modality", "celltype", "n_cells", "n_donors", "n_de_sig",
+        "de_burden", "mean_abs_lfc_sig", "donor_auc", "donor_folds",
+        "eta2_condition", "eta2_donor", "condition_variance_share",
+        "reversal_mean_abs_lfc") if c in impact.columns]
+    st.dataframe(impact[keep].round(3), width="stretch", hide_index=True)
+    st.caption(
+        "`de_burden` is a cell-level test whose power grows with `n_cells`; "
+        "`donor_auc` is the only condition test in the table. "
+        "`condition_variance_share` is a heuristic, not a variance partition: "
+        "a 24-level donor factor has more opportunity to explain variance "
+        "than a 2-level condition factor, so the share is a lower bound on "
+        "donor dominance. `reversal_frac_above_perm_q95` is omitted because "
+        "the permuted reversal control is empty in n08\u2013n24."
     )
 
 

@@ -170,6 +170,20 @@ condition, so the AUC is undefined and every cell-level contrast is also a donor
 contrast; it only becomes a condition test from n08 onward. `eta2_condition` versus
 `eta2_donor` shows how much of the variance is condition and how much is donor.
 
+Figures: `python src/plot_impact.py` writes 300 dpi PNGs to the Windows Desktop
+`Celltype_impact` folder (`C:\Users\gerar\OneDrive\Desktop\Celltype_impact`) —
+`impact_dumbbell_<step>.png` (DE burden and donor-held-out AUC on one row per cell
+type), `impact_burden_vs_auc.png` (burden vs separability, marker area ∝ cells),
+`impact_heatmap.png` (cell type × cohort, burden and AUC) and
+`impact_de_features_<step>_<modality>.png` (top significant features per cell
+type). The dashboard imports the same builders, so the page and the PNGs cannot
+drift apart. `de_burden` is a cell-level test whose power grows with the number of
+cells; `donor_auc` is the only condition test, so the two are drawn together
+rather than in separate bar panels. The top of the feature ranking is dominated by
+XIST/TSIX in almost every cell type, because they track donor sex and the PD and
+Aged groups are sex-imbalanced; the ranking is condition plus donor covariates, not
+condition alone.
+
 ### Synthetic-to-real utility (ML PoC)
 
 `R/05_utility_sim.R` fits scDesign3 on training donors only and simulates
@@ -449,7 +463,7 @@ python src/export_figures.py --out ~/Desktop/GSE193688_figures
 
 It imports the dashboard pages, swaps `st.pyplot` for `savefig`, and drives the
 dropdowns so each option is exported (`UMAP` × 4 colourings, every scaling
-analysis × metric, every subtype cell type × modality). Output is 300 dpi PNG with a
+analysis × metric, every impact and subtype cell type × modality). Output is 300 dpi PNG with a
 `README.md` and `index.csv` listing each file's heading and selection. A
 `_MISSING.txt` marks a stage that has no artifacts for that cohort; `_ERROR.txt`
 records a page that failed to render.

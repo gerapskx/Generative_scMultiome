@@ -156,11 +156,24 @@ def _subtype_rounds(root: Path) -> list[list[str]]:
     return rounds
 
 
+def _impact_rounds(root: Path) -> list[list[str]]:
+    path = root / "impact" / "de_features.csv"
+    if not path.exists():
+        return [[]]
+    # Attribute access, not tuple unpacking: `usecols` keeps the file's column
+    # order, and the page calls the cell-type dropdown before the modality one.
+    frame = pd.read_csv(path, usecols=["celltype", "modality"])
+    pairs = frame.drop_duplicates().sort_values(["celltype", "modality"])
+    return [[row.celltype, row.modality] for row in pairs.itertuples(index=False)]
+
+
 def _rounds(section: str, cohort_dir: Path) -> list[list[str]]:
     if section == "02_qc":
         return [["celltype"], ["donor"], ["group"], ["cluster"]]
     if section == "07_scaling":
         return _scaling_rounds()
+    if section == "08_impact":
+        return _impact_rounds(cohort_dir)
     if section == "10_subtype":
         return _subtype_rounds(cohort_dir)
     return [[]]
@@ -307,7 +320,7 @@ def main() -> int:
         "| `05_hypothesis` | Power on alternative data |",
         "| `06_reversal` | Model effect vs classifier contribution |",
         "| `07_scaling` | Every scaling metric against donor count |",
-        "| `08_impact` | Cell-type impact and separability vs N |",
+        "| `08_impact` | Cell-type impact: burden vs separability, by cohort, top DE features |",
         "| `09_utility` | Synthetic-to-real learning curve |",
         "| `10_subtype` | Subtype transfer matrices, controls, Jaccard |",
         "",
